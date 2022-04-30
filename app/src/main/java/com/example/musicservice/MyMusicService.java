@@ -3,6 +3,7 @@ package com.example.musicservice;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -18,20 +19,18 @@ public class MyMusicService extends Service {
     public static final String LEN="len";
 
     private Handler progressHandler=null;
-    private MainActivity context=null;
+    private ProgressUI ui=null;
 
-    public MyMusicService(Handler progressHandler) {
-        if(getBaseContext() instanceof MainActivity){
-            this.context=(MainActivity) getBaseContext();
-                Log.d("sdf","dsf");
-        }
-        Log.d("sdf","dfs");
+    private String TAG="music";
+
+    public MyMusicService() {
+        Log.d(TAG,"dfs");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        onStartCommand(intent,0,0);
+        return new TheBinder(this);
     }
 
 
@@ -39,7 +38,7 @@ public class MyMusicService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
+        Log.d(TAG,"start");
         //获取意图传递的信息
         String action = intent.getStringExtra("action");
 
@@ -71,17 +70,29 @@ public class MyMusicService extends Service {
                 break;
         }
 
-        if(context!=null){
+        if(ui!=null){
             Message msg=Message.obtain();
             msg.what=PROGRESS_SET;
             Bundle data=new Bundle();data.putInt(LEN,mediaPlayer.getDuration());
             msg.setData(data);
-            context.progressUpdate(msg);
+            ui.progressUpdate(msg);
         }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
+    interface ProgressUI{
+        public void progressUpdate(Message msg);
+    };
 
+    public class TheBinder extends Binder {
+        private MyMusicService service;
+        public TheBinder(MyMusicService service){
+            this.service=service;
+        }
 
+        void bind(ProgressUI ui){
+            service.ui=ui;
+        }
+    }
 }

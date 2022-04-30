@@ -3,16 +3,20 @@ package com.example.musicservice;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MyMusicService.ProgressUI {
 
     private String TAG="main";
 
@@ -54,32 +58,32 @@ public class MainActivity extends AppCompatActivity {
 
     public void play_onclick(View view)
     {
-        Intent intent = new Intent(this,MyMusicService.class);
+        Intent intent = new Intent(MainActivity.this,MyMusicService.class);
 
         intent.putExtra("action","play");
 
-        startService(intent);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         tv_1.setText("播放状态11：正在播放。。。");
     }
 
     public void stop_onclick(View view)
     {
-        Intent intent = new Intent(this,MyMusicService.class);
+        Intent intent = new Intent(MainActivity.this,MyMusicService.class);
 
         intent.putExtra("action","stop");
 
-        startService(intent);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         tv_1.setText("播放状态11：停止播放。。。");
     }
     public void pause_onclick(View view)
     {
-        Intent intent = new Intent(this,MyMusicService.class);
+        Intent intent = new Intent(MainActivity.this,MyMusicService.class);
 
         intent.putExtra("action","pause");
 
-        startService(intent);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         tv_1.setText("播放状态11：暂停播放。。。");
     }
@@ -92,5 +96,21 @@ public class MainActivity extends AppCompatActivity {
     public void progressUpdate(Message msg){
             progressHandler.sendMessage(msg);
     }
+
+
+    private ServiceConnection connection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+
+            ((MyMusicService.TheBinder) service).bind(MainActivity.this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+
+        }
+    };
 
 }
