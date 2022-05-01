@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements MyMusicService.Pr
                 intent.putExtra("init",barLen);
                 startService(intent);
                 bindService(intent, connection, Context.BIND_AUTO_CREATE);
+                tv_1.setText("播放状态：正在播放。。。");
             }
             else {
                 service.setMediaTime(barLen);
